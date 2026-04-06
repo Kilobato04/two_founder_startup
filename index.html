@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Smability · 2-Founder AI Startup · Plan 2026–2030</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,sans-serif}::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-track{background:#1e293b}::-webkit-scrollbar-thumb{background:#475569;border-radius:3px}table{width:100%;border-collapse:collapse}button{cursor:pointer}</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const{useState}=React;
+const FX=20,TASA=0.09,YEARS=[2026,2027,2028,2029,2030],EH=0.58,EO=0.42;
+const CASA_2030=14500000*Math.pow(1.07,5);
+const CASA_OCT=CASA_2030*0.45;
+const AFORE_2030=(()=>{let a=1000000;for(let i=0;i<5;i++)a=(a+30000)*1.06;return a;})();
+
+const BASE={
+  2026:{b2b:70100,ag:29400,dev:49,usr:1000,sal:35000*12+35000*2,ofi:10000*12,sim:690*12,imp:6000*12,seg:27600*2,nub:1800*12,var:2000*12,mkt:52000,hc:1.5,dp:463000,dn:0},
+  2027:{b2b:88700,ag:132300,dev:61,usr:4500,sal:(35000+35000+45000*.75)*12,ofi:14000*12,sim:900*12,imp:10000*12,seg:27600*3,nub:3000*12,var:4000*12,mkt:80000,hc:3,dp:0,dn:Math.round(221000*FX*.10)},
+  2028:{b2b:128455,ag:373500,dev:81,usr:9000,sal:(35000+35000+45000+45000)*12,ofi:16000*12,sim:1200*12,imp:14000*12,seg:27600*4,nub:5000*12,var:5000*12,mkt:150000,hc:4,dp:Math.round(221000*FX*.10),dn:Math.round(502000*FX*.10)},
+  2029:{b2b:165670,ag:801000,dev:106,usr:15000,sal:(35000+35000+45000*4)*12,ofi:18000*12,sim:1500*12,imp:18000*12,seg:27600*6,nub:8000*12,var:6000*12,mkt:250000,hc:6,dp:Math.round(502000*FX*.10),dn:Math.round(967000*FX*.10)},
+  2030:{b2b:203322,ag:934500,dev:130,usr:17500,sal:(35000+35000+45000*6)*12,ofi:20000*12,sim:1800*12,imp:22000*12,seg:27600*8,nub:10000*12,var:7000*12,mkt:350000,hc:8,dp:Math.round(967000*FX*.10),dn:0},
+};
+const MIN={
+  2026:{...BASE[2026]},
+  2027:{b2b:75000,ag:40000,dev:52,usr:1500,sal:(35000+35000)*12,ofi:12000*12,sim:750*12,imp:8000*12,seg:27600*2,nub:2000*12,var:3000*12,mkt:40000,hc:2,dp:0,dn:Math.round(115000*FX*.10)},
+  2028:{b2b:95000,ag:90000,dev:62,usr:3000,sal:(35000+35000+45000)*12,ofi:14000*12,sim:900*12,imp:10000*12,seg:27600*3,nub:3000*12,var:4000*12,mkt:80000,hc:3,dp:Math.round(115000*FX*.10),dn:Math.round(185000*FX*.10)},
+  2029:{b2b:120000,ag:180000,dev:70,usr:5000,sal:(35000+35000+45000+45000)*12,ofi:16000*12,sim:1100*12,imp:12000*12,seg:27600*4,nub:4000*12,var:5000*12,mkt:120000,hc:4,dp:Math.round(185000*FX*.10),dn:Math.round(300000*FX*.10)},
+  2030:{b2b:145000,ag:264600,dev:78,usr:6000,sal:(35000+35000+45000*3)*12,ofi:17000*12,sim:1300*12,imp:14000*12,seg:27600*5,nub:5000*12,var:5000*12,mkt:180000,hc:5,dp:Math.round(300000*FX*.10),dn:0},
+};
+
+const calc=data=>YEARS.map(yr=>{
+  const d=data[yr],arrusd=d.b2b+d.ag,arrmxn=arrusd*FX;
+  const gop=d.sal+d.ofi+d.sim+d.imp+d.seg+d.nub+d.var+d.mkt;
+  const gtot=gop+d.dp,util=arrmxn-gtot;
+  return{yr,arrusd,arrmxn,gop,gtot,util,...d};
+});
+const buildPort=rows=>{let p=0;return rows.map(r=>{const aporte=Math.max(0,r.util);p=(p+aporte)*(1+TASA);return{yr:r.yr,aporte,p};});};
+const n=v=>Math.round(v).toLocaleString('es-MX');
+const mu=v=>'$'+n(v);
+
+const TABS=['P&L','Gastos','Deuda','Portafolio','Exit','Patrimonio','⚡ Mínimo'];
+
+function App(){
+  const[tab,setTab]=useState('P&L');
+  const[sc,setSc]=useState('base');
+  const bRows=calc(BASE),mRows=calc(MIN);
+  const bPort=buildPort(bRows),mPort=buildPort(mRows);
+  const bPT=bPort[4].p,mPT=mPort[4].p;
+  const rows=sc==='base'?bRows:mRows;
+  const port=sc==='base'?bPort:mPort;
+  const arrB=bRows[4].arrusd,arrM=mRows[4].arrusd;
+  const pat=(pt,arr,real)=>{const ex=arr*8*FX;return{H:pt*EH+ex*EH,O:pt*EO+ex*EO+(real?CASA_OCT+AFORE_2030:0)};};
+  const pB=pat(bPT,arrB,true),pM=pat(mPT,arrM,true);
+
+  const th={padding:'9px 12px',textAlign:'right',color:'#64748b',fontWeight:600,fontSize:12};
+  const td=(c,b)=>({padding:'8px 12px',textAlign:'right',color:c,fontWeight:b?700:400,fontSize:12});
+  const tl=(c,b)=>({padding:'8px 12px',textAlign:'left',color:c,fontWeight:b?700:400,fontSize:12});
+
+  const Card=({label,val,sub,color='#38bdf8'})=>(
+    <div style={{background:'#1e293b',borderRadius:10,padding:'10px 12px',border:'1px solid #334155'}}>
+      <div style={{fontSize:10,color:'#64748b',textTransform:'uppercase',letterSpacing:1}}>{label}</div>
+      <div style={{fontSize:15,fontWeight:700,color,margin:'3px 0'}}>{val}</div>
+      <div style={{fontSize:10,color:'#64748b'}}>{sub}</div>
+    </div>
+  );
+
+  const ScToggle=()=>(
+    <div style={{display:'flex',gap:8,marginBottom:12}}>
+      {[['base','📈 Full Effort'],['min','⚡ Mínimo']].map(([id,lbl])=>(
+        <button key={id} onClick={()=>setSc(id)} style={{padding:'4px 14px',borderRadius:6,border:'none',fontSize:12,background:sc===id?'#fbbf24':'#1e293b',color:sc===id?'#0f172a':'#94a3b8',fontWeight:sc===id?700:400}}>{lbl}</button>
+      ))}
+    </div>
+  );
+
+  return(
+    <div style={{fontFamily:'system-ui',background:'#0f172a',color:'#e2e8f0',minHeight:'100vh',padding:16}}>
+      <div style={{maxWidth:1000,margin:'0 auto'}}>
+
+        {/* Header */}
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:10,color:'#64748b',letterSpacing:3,textTransform:'uppercase'}}>Confidencial · Uso Interno</div>
+          <h1 style={{fontSize:22,fontWeight:800,margin:'4px 0',color:'#f1f5f9'}}>
+            Smability <span style={{color:'#38bdf8'}}>·</span> 2-Founder AI Startup
+          </h1>
+          <div style={{fontSize:12,color:'#64748b'}}>Plan Financiero 2026–2030 · TC $20 · Portafolio 9% · Deuda 10% ARR · H:{Math.round(EH*100)}% / O:{Math.round(EO*100)}%</div>
+        </div>
+
+        {/* KPIs */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:8,marginBottom:16}}>
+          <Card label="ARR 2030 Full" val={mu(arrB)} sub="USD full effort"/>
+          <Card label="ARR 2030 Mínimo" val={mu(arrM)} sub="USD mínimo esfuerzo" color="#fbbf24"/>
+          <Card label="Casa 2030" val={mu(CASA_2030/1e6)+'M'} sub="MXN · plusvalía 7%/año"/>
+          <Card label="AFORE 2030" val={mu(AFORE_2030)} sub="MXN · 6%+$30K/año"/>
+          <Card label="Utilidad 2026" val={mu(bRows[0].util)} sub="MXN · meta $550K" color="#4ade80"/>
+        </div>
+
+        {/* Tabs */}
+        <div style={{display:'flex',gap:6,marginBottom:14,flexWrap:'wrap'}}>
+          {TABS.map(t=>(
+            <button key={t} onClick={()=>setTab(t)} style={{padding:'5px 14px',borderRadius:6,border:'none',fontSize:12,background:tab===t?'#38bdf8':'#1e293b',color:tab===t?'#0f172a':'#94a3b8',fontWeight:tab===t?700:400}}>{t}</button>
+          ))}
+        </div>
+
+        {/* P&L */}
+        {tab==='P&L'&&<><ScToggle/>
+          <div style={{background:'#1e293b',borderRadius:12,overflow:'auto',border:'1px solid #334155'}}>
+            <table>
+              <thead><tr style={{background:'#0f172a'}}>
+                <th style={{...th,textAlign:'left'}}>Concepto</th>
+                {YEARS.map(y=><th key={y} style={th}>{y}</th>)}
+              </tr></thead>
+              <tbody>
+                {[
+                  {lbl:'📡 B2B HW+SaaS (USD)',key:'b2b',fmt:'u',color:'#94a3b8'},
+                  {lbl:'🤖 AireGPT B2C (USD)',key:'ag',fmt:'u',color:'#94a3b8'},
+                  {lbl:'💰 ARR Total (USD)',key:'arrusd',fmt:'u',color:'#38bdf8',bold:true},
+                  {lbl:'💰 ARR Total (MXN)',key:'arrmxn',fmt:'m',color:'#38bdf8',bold:true},
+                  {lbl:'🏭 Gastos Operativos',key:'gop',fmt:'m',color:'#f87171'},
+                  {lbl:'💳 Pago Deuda',key:'dp',fmt:'m',color:'#fbbf24'},
+                  {lbl:'📊 Total Egresos',key:'gtot',fmt:'m',color:'#f87171',bold:true},
+                  {lbl:'✅ Utilidad Neta (MXN)',key:'util',fmt:'m',color:'#4ade80',bold:true},
+                  {lbl:'✅ Utilidad Neta (USD)',key:'util',fmt:'ud',color:'#4ade80',bold:true},
+                  {lbl:'👥 Headcount',key:'hc',fmt:'r',color:'#94a3b8'},
+                  {lbl:'📡 Dispositivos',key:'dev',fmt:'r',color:'#94a3b8'},
+                  {lbl:'👤 Usuarios pago',key:'usr',fmt:'r',color:'#94a3b8'},
+                ].map((row,i)=>(
+                  <tr key={row.lbl} style={{borderTop:'1px solid #334155',background:i%2===0?'transparent':'#ffffff05'}}>
+                    <td style={tl(row.color,row.bold)}>{row.lbl}</td>
+                    {rows.map(d=>{
+                      const v=d[row.key];
+                      const disp=row.fmt==='r'?n(v):row.fmt==='u'?mu(v):row.fmt==='ud'?mu(v/FX):mu(v);
+                      return<td key={d.yr} style={td(v<0&&row.fmt!=='r'?'#f87171':row.color,row.bold)}>{disp}</td>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>}
+
+        {/* Gastos */}
+        {tab==='Gastos'&&<><ScToggle/>
+          <div style={{background:'#1e293b',borderRadius:12,overflow:'auto',border:'1px solid #334155'}}>
+            <table>
+              <thead><tr style={{background:'#0f172a'}}>
+                <th style={{...th,textAlign:'left'}}>Gasto MXN/año</th>
+                {YEARS.map(y=><th key={y} style={th}>{y}</th>)}
+              </tr></thead>
+              <tbody>
+                {[['sal','👨‍💼 Salarios'],['ofi','🏢 Oficina'],['sim','📱 SIMs'],['imp','🏛️ Impuestos'],['seg','🏥 Seguro GMM'],['nub','☁️ Nube'],['var','📦 Varios'],['mkt','📣 Marketing'],['dp','💳 Pago deuda']].map(([key,lbl],i)=>(
+                  <tr key={key} style={{borderTop:'1px solid #334155',background:i%2===0?'transparent':'#ffffff05'}}>
+                    <td style={tl('#94a3b8')}>{lbl}</td>
+                    {rows.map(d=><td key={d.yr} style={td(key==='dp'?'#fbbf24':'#94a3b8')}>{mu(d[key])}</td>)}
+                  </tr>
+                ))}
+                <tr style={{borderTop:'2px solid #475569'}}>
+                  <td style={tl('#f87171',true)}>💸 Total Egresos</td>
+                  {rows.map(d=><td key={d.yr} style={td('#f87171',true)}>{mu(d.gtot)}</td>)}
+                </tr>
+                <tr style={{borderTop:'1px solid #334155'}}>
+                  <td style={tl('#4ade80',true)}>✅ Utilidad Neta</td>
+                  {rows.map(d=><td key={d.yr} style={td(d.util>=0?'#4ade80':'#f87171',true)}>{mu(d.util)}</td>)}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </>}
+
+        {/* Deuda */}
+        {tab==='Deuda'&&<><ScToggle/>
+          <div style={{background:'#1e293b',borderRadius:12,overflow:'auto',border:'1px solid #334155'}}>
+            <table>
+              <thead><tr style={{background:'#0f172a'}}>
+                {['Año','ARR MXN','Deuda nueva 10%','Pago anterior','Posición neta','Uso sugerido'].map(h=>(
+                  <th key={h} style={{...th,textAlign:h==='Año'||h==='Uso sugerido'?'left':'right'}}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {rows.map((d,i)=>{
+                  const usos=['Liquidar deuda $463K','HW + capital trabajo','Expansión MTY/GDL','Aceleración AireGPT','Reserva pre-exit'];
+                  return(
+                    <tr key={d.yr} style={{borderTop:'1px solid #334155',background:i%2===0?'transparent':'#ffffff05'}}>
+                      <td style={tl('#f1f5f9',true)}>{d.yr}</td>
+                      <td style={td('#38bdf8')}>{mu(d.arrmxn)}</td>
+                      <td style={td('#fbbf24')}>{mu(d.dn)}</td>
+                      <td style={td('#f87171')}>{mu(d.dp)}</td>
+                      <td style={td(d.dn-d.dp>=0?'#4ade80':'#f87171',true)}>{mu(d.dn-d.dp)}</td>
+                      <td style={{...tl('#64748b'),fontSize:11}}>{usos[i]}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>}
+
+        {/* Portafolio */}
+        {tab==='Portafolio'&&<><ScToggle/>
+          <div style={{background:'#1e293b',borderRadius:12,overflow:'auto',border:'1px solid #334155'}}>
+            <table>
+              <thead><tr style={{background:'#0f172a'}}>
+                {['Año','Utilidad MXN','Aporte','Interés 9%','Portafolio',`H ${Math.round(EH*100)}%`,`O ${Math.round(EO*100)}%`].map(h=>(
+                  <th key={h} style={{...th,textAlign:h==='Año'?'left':'right'}}>{h}</th>
+                ))}
+              </tr></thead>
+              <tbody>
+                {port.map((row,i)=>{
+                  const util=rows[i].util,prev=i===0?0:port[i-1].p,interes=(prev+row.aporte)*TASA;
+                  return(
+                    <tr key={row.yr} style={{borderTop:'1px solid #334155',background:i%2===0?'transparent':'#ffffff05'}}>
+                      <td style={tl('#f1f5f9',true)}>{row.yr}</td>
+                      <td style={td(util>=0?'#4ade80':'#f87171')}>{mu(util)}</td>
+                      <td style={td('#94a3b8')}>{mu(row.aporte)}</td>
+                      <td style={td('#38bdf8')}>{mu(interes)}</td>
+                      <td style={td('#38bdf8',true)}>{mu(row.p)}</td>
+                      <td style={td('#a78bfa')}>{mu(row.p*EH)}</td>
+                      <td style={td('#fb923c')}>{mu(row.p*EO)}</td>
+                    </tr>
+                  );
+                })}
+                <tr style={{borderTop:'2px solid #475569',background:'#0f172a'}}>
+                  <td colSpan={4} style={tl('#f1f5f9',true)}>🏦 Total portafolio 2030</td>
+                  <td style={td('#38bdf8',true)}>{mu(port[4].p)}</td>
+                  <td style={td('#a78bfa',true)}>{mu(port[4].p*EH)}</td>
+                  <td style={td('#fb923c',true)}>{mu(port[4].p*EO)}</td>
+                </tr>
+                <tr style={{background:'#0f172a'}}>
+                  <td colSpan={4} style={{...tl('#64748b'),fontSize:11}}>En USD</td>
+                  <td style={{...td('#38bdf8'),fontSize:11}}>{mu(port[4].p/FX)}</td>
+                  <td style={{...td('#a78bfa'),fontSize:11}}>{mu(port[4].p*EH/FX)}</td>
+                  <td style={{...td('#fb923c'),fontSize:11}}>{mu(port[4].p*EO/FX)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </>}
+
+        {/* Exit */}
+        {tab==='Exit'&&(
+          <div style={{display:'flex',flexDirection:'column',gap:14}}>
+            {[['base','📈 Full Effort',arrB,bPT,'#38bdf8'],['min','⚡ Mínimo',arrM,mPT,'#fbbf24']].map(([s,lbl,arr,pt,bc])=>(
+              <div key={s} style={{background:'#1e293b',borderRadius:12,padding:18,border:`1px solid ${bc}44`}}>
+                <div style={{fontSize:13,fontWeight:700,color:'#f1f5f9',marginBottom:4}}>{lbl}</div>
+                <div style={{fontSize:11,color:'#64748b',marginBottom:14}}>ARR 2030: {mu(arr)} USD · {mu(arr*FX)} MXN</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
+                  {[6,8,10,12].map(m=>{
+                    const vU=arr*m,vM=vU*FX,isB=m===8;
+                    const pH2=pt*EH+vM*EH,pO2=pt*EO+vM*EO+CASA_OCT+AFORE_2030;
+                    return(
+                      <div key={m} style={{background:isB?'#1e3a5f':'#0f172a',borderRadius:8,padding:12,border:isB?`1px solid ${bc}`:'1px solid #334155'}}>
+                        {isB&&<div style={{fontSize:9,color:bc,marginBottom:4,letterSpacing:1}}>★ BASE</div>}
+                        <div style={{fontSize:22,fontWeight:700,color:bc}}>{m}x</div>
+                        <div style={{fontSize:10,color:'#64748b',marginBottom:8}}>múltiplo ARR</div>
+                        <div style={{fontSize:14,fontWeight:700,color:'#f1f5f9'}}>{mu(vU)} USD</div>
+                        <div style={{fontSize:10,color:'#64748b',marginBottom:8}}>{mu(vM)} MXN</div>
+                        <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#a78bfa',marginBottom:4}}>
+                          <span>H {Math.round(EH*100)}%</span><span style={{fontWeight:700}}>{mu(vU*EH)} USD</span>
+                        </div>
+                        <div style={{display:'flex',justifyContent:'space-between',fontSize:11,color:'#fb923c',marginBottom:10}}>
+                          <span>O {Math.round(EO*100)}%</span><span style={{fontWeight:700}}>{mu(vU*EO)} USD</span>
+                        </div>
+                        <div style={{borderTop:'1px solid #334155',paddingTop:8}}>
+                          <div style={{fontSize:9,color:'#64748b',marginBottom:4}}>Patrimonio post-exit</div>
+                          <div style={{fontSize:11,color:'#a78bfa'}}>H: {mu(pH2/1e6)}M MXN</div>
+                          <div style={{fontSize:11,color:'#fb923c'}}>O: {mu(pO2/1e6)}M MXN</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Patrimonio */}
+        {tab==='Patrimonio'&&(
+          <div style={{display:'flex',flexDirection:'column',gap:14}}>
+            {[['base','📈 Full Effort',bPT,arrB,'#38bdf8'],['min','⚡ Mínimo',mPT,arrM,'#fbbf24']].map(([s,lbl,pt,arr,bc])=>{
+              const ex8=arr*8*FX,pH=pt*EH+ex8*EH,pO=pt*EO+ex8*EO+CASA_OCT+AFORE_2030;
+              return(
+                <div key={s} style={{background:'#1e293b',borderRadius:12,padding:18,border:`1px solid ${bc}33`}}>
+                  <div style={{fontSize:13,fontWeight:700,color:'#f1f5f9',marginBottom:14}}>{lbl} — Patrimonio 2030 post-exit @8x</div>
+                  <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+                    <div style={{background:'#0f172a',borderRadius:10,padding:14,border:'1px solid #a78bfa33'}}>
+                      <div style={{fontSize:11,color:'#a78bfa',fontWeight:700,marginBottom:10}}>Horacio {Math.round(EH*100)}%</div>
+                      {[['💼 Portafolio Smability',pt*EH],['🚀 Exit @8x',ex8*EH]].map(([l,v])=>(
+                        <div key={l} style={{display:'flex',justifyContent:'space-between',marginBottom:6,fontSize:12}}>
+                          <span style={{color:'#64748b'}}>{l}</span><span style={{color:'#a78bfa',fontWeight:600}}>{mu(v)}</span>
+                        </div>
+                      ))}
+                      <div style={{borderTop:'1px solid #334155',marginTop:8,paddingTop:8}}>
+                        <div style={{fontSize:10,color:'#a78bfa'}}>TOTAL MXN</div>
+                        <div style={{fontSize:22,fontWeight:700,color:'#a78bfa'}}>{mu(pH)}</div>
+                        <div style={{fontSize:12,color:'#64748b'}}>{mu(pH/FX)} USD</div>
+                      </div>
+                    </div>
+                    <div style={{background:'#0f172a',borderRadius:10,padding:14,border:'1px solid #fb923c33'}}>
+                      <div style={{fontSize:11,color:'#fb923c',fontWeight:700,marginBottom:10}}>Octavio {Math.round(EO*100)}%</div>
+                      {[['🏠 Casa SMCH 2030 (45%)',CASA_OCT],['📊 AFORE 2030',AFORE_2030],['💼 Portafolio Smability',pt*EO],['🚀 Exit @8x',ex8*EO]].map(([l,v])=>(
+                        <div key={l} style={{display:'flex',justifyContent:'space-between',marginBottom:6,fontSize:12}}>
+                          <span style={{color:'#64748b'}}>{l}</span><span style={{color:'#fb923c',fontWeight:600}}>{mu(v)}</span>
+                        </div>
+                      ))}
+                      <div style={{borderTop:'1px solid #334155',marginTop:8,paddingTop:8}}>
+                        <div style={{fontSize:10,color:'#fb923c'}}>TOTAL MXN</div>
+                        <div style={{fontSize:22,fontWeight:700,color:'#fb923c'}}>{mu(pO)}</div>
+                        <div style={{fontSize:12,color:'#64748b'}}>{mu(pO/FX)} USD</div>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{marginTop:12,background:'#0f172a',borderRadius:8,padding:12,display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
+                    {[['Horacio',pH,'#a78bfa'],['Octavio',pO,'#fb923c'],['Diferencia',Math.abs(pH-pO),'#4ade80']].map(([l,v,c])=>(
+                      <div key={l} style={{textAlign:'center'}}>
+                        <div style={{fontSize:11,color:'#64748b',marginBottom:4}}>{l}</div>
+                        <div style={{fontSize:18,fontWeight:700,color:c}}>{mu(v/1e6)}M MXN</div>
+                        <div style={{fontSize:11,color:'#64748b'}}>{mu(v/FX)} USD</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Mínimo */}
+        {tab==='⚡ Mínimo'&&(
+          <div style={{display:'flex',flexDirection:'column',gap:14}}>
+            <div style={{background:'#1e293b',borderRadius:12,padding:18,border:'1px solid #fbbf2444'}}>
+              <div style={{fontSize:14,fontWeight:700,color:'#fbbf24',marginBottom:4}}>⚡ Escenario Mínimo Esfuerzo</div>
+              <div style={{fontSize:12,color:'#64748b',marginBottom:14}}>6,000 usuarios · 78 dispositivos · 5 personas · crecimiento orgánico</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(5,1fr)',gap:10}}>
+                {mRows.map(d=>(
+                  <div key={d.yr} style={{background:'#0f172a',borderRadius:8,padding:12}}>
+                    <div style={{fontSize:14,fontWeight:700,color:'#fbbf24',marginBottom:8}}>{d.yr}</div>
+                    {[['ARR USD',mu(d.arrusd),'#38bdf8'],['ARR MXN',mu(d.arrmxn),'#38bdf8'],['Egresos',mu(d.gtot),'#f87171'],['Utilidad',mu(d.util),d.util>=0?'#4ade80':'#f87171'],['Usuarios',n(d.usr),'#94a3b8'],['Devices',n(d.dev),'#94a3b8'],['Equipo',n(d.hc),'#94a3b8']].map(([l,v,c])=>(
+                      <div key={l} style={{display:'flex',justifyContent:'space-between',marginBottom:4,fontSize:11}}>
+                        <span style={{color:'#475569'}}>{l}</span><span style={{color:c,fontWeight:600}}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div style={{background:'#1e293b',borderRadius:12,padding:18,border:'1px solid #334155'}}>
+              <div style={{fontSize:13,fontWeight:700,color:'#f1f5f9',marginBottom:14}}>📊 Full vs Mínimo — 2030</div>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
+                {[['ARR 2030',mu(arrB)+' USD',mu(arrM)+' USD'],['Usuarios pago','17,500','6,000'],['Dispositivos','130','78'],['Headcount','8','5'],['Portafolio',mu(bPT/1e6)+'M MXN',mu(mPT/1e6)+'M MXN'],['Exit @8x',mu(arrB*8)+' USD',mu(arrM*8)+' USD'],['Patrimonio H',mu(pB.H/1e6)+'M',mu(pM.H/1e6)+'M'],['Patrimonio O',mu(pB.O/1e6)+'M',mu(pM.O/1e6)+'M']].map(([lbl,b,m])=>(
+                  <div key={lbl} style={{background:'#0f172a',borderRadius:8,padding:12}}>
+                    <div style={{fontSize:11,color:'#64748b',marginBottom:6}}>{lbl}</div>
+                    <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                      <span style={{fontSize:10,color:'#64748b'}}>Full</span>
+                      <span style={{fontSize:12,fontWeight:700,color:'#38bdf8'}}>{b}</span>
+                    </div>
+                    <div style={{display:'flex',justifyContent:'space-between'}}>
+                      <span style={{fontSize:10,color:'#64748b'}}>Mín</span>
+                      <span style={{fontSize:12,fontWeight:700,color:'#fbbf24'}}>{m}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{marginTop:14,background:'#0f172a',borderRadius:8,padding:14,fontSize:12,color:'#94a3b8',lineHeight:1.8}}>
+                <strong style={{color:'#fbbf24'}}>⚡ Conclusión:</strong> Con mínimo esfuerzo el negocio es <strong style={{color:'#4ade80'}}>rentable y con exit real</strong>.<br/>
+                El esfuerzo adicional vale <strong style={{color:'#38bdf8'}}>{mu((arrB-arrM)*8*EO)} USD más para Octavio</strong> y <strong style={{color:'#a78bfa'}}>{mu((arrB-arrM)*8*EH)} USD más para Horacio</strong>.<br/>
+                <strong style={{color:'#f1f5f9'}}>En ambos escenarios los dos fundadores alcanzan su objetivo de retiro.</strong>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div style={{marginTop:16,fontSize:11,color:'#334155',textAlign:'center'}}>
+          Smability SAPI de CV · Confidencial · {new Date().toLocaleDateString('es-MX')}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
