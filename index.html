@@ -29,7 +29,7 @@ const AFORE_2030=(()=>{let a=1000000;for(let i=0;i<5;i++)a=(a+30000)*1.06;return
 
 // ── DATOS BASE ────────────────────────────────────────────
 const BASE={
-  2026:{b2b:70100, ag:29400,  dat:0,      dev:49,  usr:1000,  sal:35000*12+35000*2,            ofi:10000*12,sim:690*12, imp:6000*12, seg:27600*2,nub:1800*12,var:2000*12,mkt:52000, hc:1.5,dp:463000,            dn:0},
+  2026:{b2b:70100, ag:29400,  dat:0,      dev:49,  usr:1000,  sal:35000*12+35000*2,            ofi:10000*12,sim:690*12, imp:6000*12, seg:27600*2,nub:1800*12,var:175000,mkt:52000, hc:1.5,dp:463000,            dn:0},
   2027:{b2b:88700, ag:132300, dat:15000,  dev:61,  usr:4500,  sal:(35000+35000+45000*.75)*12,   ofi:14000*12,sim:900*12, imp:10000*12,seg:27600*3,nub:3000*12,var:4000*12,mkt:80000, hc:3,  dp:0,                 dn:Math.round(221000*FX*.10)},
   2028:{b2b:128455,ag:373500, dat:60000,  dev:81,  usr:9000,  sal:(35000+35000+45000+45000)*12, ofi:16000*12,sim:1200*12,imp:14000*12,seg:27600*4,nub:5000*12,var:5000*12,mkt:150000,hc:4,  dp:Math.round(221000*FX*.10),dn:Math.round(502000*FX*.10)},
   2029:{b2b:165670,ag:801000, dat:120000, dev:106, usr:15000, sal:(35000+35000+45000*4)*12,     ofi:18000*12,sim:1500*12,imp:18000*12,seg:27600*6,nub:8000*12,var:6000*12,mkt:250000,hc:6,  dp:Math.round(502000*FX*.10),dn:Math.round(967000*FX*.10)},
@@ -162,25 +162,26 @@ function App(){
               </tr></thead>
               <tbody>
                 {[
-                  {lbl:'📡 B2B HW+SaaS (USD)',  key:'b2b',   fmt:'u', color:'#94a3b8'},
-                  {lbl:'🤖 AireGPT B2C (USD)',   key:'ag',    fmt:'u', color:'#94a3b8'},
-                  {lbl:'📊 API Datos (USD)',      key:'dat',   fmt:'u', color:'#a78bfa'},
-                  {lbl:'💰 ARR Total (USD)',      key:'arrusd',fmt:'u', color:'#38bdf8',bold:true},
-                  {lbl:'💰 ARR Total (MXN)',      key:'arrmxn',fmt:'m', color:'#38bdf8',bold:true},
-                  {lbl:'🏭 Gastos Operativos',   key:'gop',   fmt:'m', color:'#f87171'},
-                  {lbl:'💳 Pago Deuda',          key:'dp',    fmt:'m', color:'#fbbf24'},
-                  {lbl:'📊 Total Egresos',       key:'gtot',  fmt:'m', color:'#f87171',bold:true},
-                  {lbl:'✅ Utilidad Neta (MXN)', key:'util',  fmt:'m', color:'#4ade80',bold:true},
-                  {lbl:'✅ Utilidad Neta (USD)', key:'util',  fmt:'ud',color:'#4ade80',bold:true},
-                  {lbl:'👥 Headcount',           key:'hc',    fmt:'r', color:'#94a3b8'},
-                  {lbl:'📡 Dispositivos',        key:'dev',   fmt:'r', color:'#94a3b8'},
-                  {lbl:'👤 Usuarios pago',       key:'usr',   fmt:'r', color:'#94a3b8'},
+                  {lbl:'📡 B2B HW+SaaS (USD)',        key:'b2b',   fmt:'u', color:'#94a3b8'},
+                  {lbl:'🤖 AireGPT B2C (USD)',         key:'ag',    fmt:'u', color:'#94a3b8'},
+                  {lbl:'📊 API Datos (USD)',            key:'dat',   fmt:'u', color:'#a78bfa'},
+                  {lbl:'💰 ARR Total (USD)',            key:'arrusd',fmt:'u', color:'#38bdf8',bold:true},
+                  {lbl:'💰 ARR Total (MXN)',            key:'arrmxn',fmt:'m', color:'#38bdf8',bold:true},
+                  {lbl:'🏭 Gastos Operativos (MXN)',   key:'gop',   fmt:'m', color:'#f87171'},
+                  {lbl:'💳 Pago Deuda (MXN)',          key:'dp',    fmt:'m', color:'#fbbf24'},
+                  {lbl:'📊 Total Egresos (MXN)',       key:'gtot',  fmt:'m', color:'#f87171',bold:true},
+                  {lbl:'✅ Utilidad Neta (MXN)',       key:'util',  fmt:'m', color:'#4ade80',bold:true},
+                  {lbl:'✅ Utilidad Neta (USD)',       key:'util',  fmt:'ud',color:'#4ade80',bold:true},
+                  {lbl:'👥 Headcount',                key:'hc',    fmt:'r', color:'#94a3b8'},
+                  {lbl:'📡 Dispositivos',             key:'dev',   fmt:'r', color:'#94a3b8'},
+                  {lbl:'👤 Usuarios pago',            key:'usr',   fmt:'r', color:'#94a3b8'},
+                  {lbl:'💵 Ingreso bruto x empleado (MXN)', key:'arrmxn', fmt:'emp', color:'#64748b'},
                 ].map((row,i)=>(
                   <tr key={row.lbl} style={{borderTop:'1px solid #334155',background:i%2===0?'transparent':'#ffffff05'}}>
                     <td style={tl(row.color,row.bold)}>{row.lbl}</td>
                     {rows.map(d=>{
                       const v=d[row.key];
-                      const disp=row.fmt==='r'?n(v):row.fmt==='u'?mu(v):row.fmt==='ud'?mu(v/FX):mu(v);
+                      const disp=row.fmt==='r'?n(v):row.fmt==='u'?mu(v):row.fmt==='ud'?mu(v/FX):row.fmt==='emp'?mu(Math.round(d.arrmxn/d.hc)):mu(v);
                       return<td key={d.yr} style={td(v<0&&row.fmt!=='r'?'#f87171':row.color,row.bold)}>{disp}</td>;
                     })}
                   </tr>
@@ -199,8 +200,8 @@ function App(){
                 {YEARS.map(y=><th key={y} style={th}>{y}</th>)}
               </tr></thead>
               <tbody>
-                {[['sal','👨‍💼 Salarios'],['ofi','🏢 Oficina'],['sim','📱 SIMs'],['imp','🏛️ Impuestos'],
-                  ['seg','🏥 Seguro GMM'],['nub','☁️ Nube'],['var','📦 Varios'],['mkt','📣 Marketing'],['dp','💳 Pago deuda']
+                {[['sal','👨‍💼 Salarios (MXN)'],['ofi','🏢 Oficina (MXN)'],['sim','📱 SIMs (MXN)'],['imp','🏛️ Impuestos (MXN)'],
+                  ['seg','🏥 Seguro GMM (MXN)'],['nub','☁️ Nube (MXN)'],['var','📦 Varios (MXN)'],['mkt','📣 Marketing (MXN)'],['dp','💳 Pago deuda (MXN)']
                 ].map(([key,lbl],i)=>(
                   <tr key={key} style={{borderTop:'1px solid #334155',background:i%2===0?'transparent':'#ffffff05'}}>
                     <td style={tl('#94a3b8')}>{lbl}</td>
@@ -208,12 +209,17 @@ function App(){
                   </tr>
                 ))}
                 <tr style={{borderTop:'2px solid #475569'}}>
-                  <td style={tl('#f87171',true)}>💸 Total Egresos</td>
+                  <td style={tl('#f87171',true)}>💸 Total Egresos (MXN)</td>
                   {rows.map(d=><td key={d.yr} style={td('#f87171',true)}>{mu(d.gtot)}</td>)}
                 </tr>
                 <tr style={{borderTop:'1px solid #334155'}}>
-                  <td style={tl('#4ade80',true)}>✅ Utilidad Neta</td>
+                  <td style={tl('#4ade80',true)}>✅ Utilidad Neta (MXN)</td>
                   {rows.map(d=><td key={d.yr} style={td(d.util>=0?'#4ade80':'#f87171',true)}>{mu(d.util)}</td>)}
+                </tr>
+                <tr style={{borderTop:'1px solid #334155',background:'#0f172a'}}>
+                  <td style={{...tl('#64748b'),fontSize:11}} colSpan={6}>
+                    ⚠️ <em>Nota: Los impuestos son preliminares y deben revisarse con el contador. ISR corporativo México = 30% sobre utilidad gravable. Las cifras aquí no consideran deducciones fiscales específicas.</em>
+                  </td>
                 </tr>
               </tbody>
             </table>
